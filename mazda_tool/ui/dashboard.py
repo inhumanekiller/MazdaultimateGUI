@@ -67,3 +67,46 @@ class MazdaUltimateDashboard(QMainWindow):
         rpm, hp, torque = self.dyno_simulator.simulate(boost_psi=boost, ignition_offset=ignition_offset)
         self.dyno_simulator.plot()
         self.status_label.setText(f"Dyno Complete: Peak HP ~{int(max(hp))} | Torque ~{int(max(torque))} lb-ft")
+
+
+# Update mazda_tool/ui/dashboard.py
+from mazda_tool.core.security import MazdaSecurityManager
+
+# Inside MazdaUltimateDashboard.__init__():
+self.security_manager = MazdaSecurityManager()
+self.security_manager.security_status_changed.connect(self.update_security_status)
+
+# Add Security Tab
+self.security_tab = QWidget()
+self.tabs.addTab(self.security_tab, "Security & Valet Mode")
+
+sec_layout = QVBoxLayout()
+
+# Valet Mode Toggle
+self.valet_checkbox = QCheckBox("Enable Valet Mode")
+self.valet_checkbox.stateChanged.connect(self.toggle_valet)
+sec_layout.addWidget(self.valet_checkbox)
+
+# Anti-Theft Disable Button
+self.anti_theft_button = QPushButton("Disable Anti-Theft")
+self.anti_theft_button.clicked.connect(self.disable_anti_theft)
+sec_layout.addWidget(self.anti_theft_button)
+
+# Status Label
+self.security_status_label = QLabel("Security Status: Active")
+sec_layout.addWidget(self.security_status_label)
+
+self.security_tab.setLayout(sec_layout)
+
+# Functions for callbacks
+def toggle_valet(self, state):
+    if state == 2:  # Checked
+        self.security_manager.enable_valet_mode()
+    else:
+        self.security_manager.disable_valet_mode("1234")  # Default PIN for override
+
+def disable_anti_theft(self):
+    self.security_manager.disable_anti_theft("4321")
+
+def update_security_status(self, message):
+    self.security_status_label.setText(f"Security Status: {message}")
