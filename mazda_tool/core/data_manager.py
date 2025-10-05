@@ -44,3 +44,9 @@ class MazdaDataManager(QObject):\
             'overall_grade': 'A'\
         \}\
 }
+# in your main window setup (e.g., mazda_tool/ui/dashboard.py or main_window.py)
+from mazda_tool.ui.torque_tab import TorqueTab
+
+# create and add the torque tab
+self.torque_tab = TorqueTab(logger=self._ui_logger)
+self.tabs.addTab(self.torque_tab, "🛞 Torque Mgmt")

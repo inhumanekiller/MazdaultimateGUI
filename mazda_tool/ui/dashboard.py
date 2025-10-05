@@ -110,3 +110,38 @@ def disable_anti_theft(self):
 
 def update_security_status(self, message):
     self.security_status_label.setText(f"Security Status: {message}")
+# in your main window setup (e.g., mazda_tool/ui/dashboard.py or main_window.py)
+from mazda_tool.ui.torque_tab import TorqueTab
+
+# create and add the torque tab
+self.torque_tab = TorqueTab(logger=self._ui_logger)
+self.tabs.addTab(self.torque_tab, "🛞 Torque Mgmt")
+# in your main GUI file where you have self.tabs
+from mazda_tool.ui.executor_tab import ExecutorTab
+
+# Provide two functions from your manager(s):
+# Example if you have a TorqueManager instance self.torque_manager:
+# queue_provider = lambda: list(self.torque_manager.list_queued_actions())
+# mark_done = lambda idx, success, msg: self.torque_manager.mark_action_done(idx, success, msg)
+
+# If you have multiple managers, you may want to aggregate queued actions:
+def combined_queue_provider():
+    # example aggregator - adjust to your implementations
+    q = []
+    try:
+        q.extend(self.torque_tab.tm.list_queued_actions())
+    except Exception:
+        pass
+    try:
+        q.extend(self.security_tab.sm.list_queued_actions())
+    except Exception:
+        pass
+    # NOTE: aggregated queues must be consistent indices for mark_done; easier is to use one executor per manager
+    return q
+
+# For simplicity, attach an executor to TorqueManager only:
+queue_provider = lambda: list(self.torque_tab.tm.list_queued_actions())
+mark_done = lambda idx, success, msg: self.torque_tab.tm.mark_action_done(idx, success, msg)
+
+self.executor_tab = ExecutorTab(queue_provider=queue_provider, mark_done=mark_done)
+self.tabs.addTab(self.executor_tab, "🔁 Executor")
